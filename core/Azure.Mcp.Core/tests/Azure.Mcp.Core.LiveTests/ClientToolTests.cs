@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Reflection;
 using System.Text.Json;
 using Azure.Mcp.Tests;
+using Azure.Mcp.Tests.Client;
 using Azure.Mcp.Tests.Client.Helpers;
 using ModelContextProtocol;
 using ModelContextProtocol.Client;
@@ -12,15 +12,12 @@ using Xunit;
 
 namespace Azure.Mcp.Core.LiveTests;
 
-public class ClientToolTests : IAsyncLifetime
+public class ClientToolTests : CommandTestsBase
 {
-    private readonly ITestOutputHelper _output;
-    private IMcpClient _client = default!;
-    private LiveTestSettings _settings = default!;
-
-    public ClientToolTests(ITestOutputHelper output)
+    public ClientToolTests(ITestOutputHelper output) : base(output)
     {
-        _output = output;
+        // Set arguments for all mode with debug logging
+        SetArguments("server", "start", "--mode", "all", "--debug");
     }
 
     public async ValueTask InitializeAsync()

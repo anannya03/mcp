@@ -3,6 +3,7 @@
 
 using System.Reflection;
 using ModelContextProtocol.Client;
+using Xunit;
 
 namespace Azure.Mcp.Tests.Client.Helpers;
 
@@ -11,6 +12,7 @@ public class LiveTestFixture : LiveTestSettingsFixture
     public IMcpClient Client { get; private set; } = default!;
 
     private string[]? _customArguments;
+    private readonly List<string> _serverErrors = new();
 
     /// <summary>
     /// Sets custom arguments for the MCP server. Call this before InitializeAsync().
@@ -20,6 +22,11 @@ public class LiveTestFixture : LiveTestSettingsFixture
     {
         _customArguments = arguments;
     }
+
+    /// <summary>
+    /// Gets any stderr output from the MCP server for debugging purposes.
+    /// </summary>
+    public IReadOnlyList<string> ServerErrors => _serverErrors.AsReadOnly();
 
     public override async ValueTask InitializeAsync()
     {
@@ -35,7 +42,24 @@ public class LiveTestFixture : LiveTestSettingsFixture
         {
             Name = "Test Server",
             Command = executablePath,
-            Arguments = arguments
+            Arguments = arguments,
+            // Capture stderr output for debugging
+            StandardErrorLines = line =>
+            {
+                _serverErrors.Add(line);
+                // Also output to test context if available for immediate visibility
+                try
+                {
+                    if (TestContext.Current != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[MCP Server] {line}");
+                    }
+                }
+                catch
+                {
+                    // Ignore if TestContext is not available
+                }
+            }
         };
 
         if (!string.IsNullOrEmpty(Settings.TestPackage))
@@ -47,6 +71,26 @@ public class LiveTestFixture : LiveTestSettingsFixture
 
         var clientTransport = new StdioClientTransport(transportOptions);
 
-        Client = await McpClientFactory.CreateAsync(clientTransport);
+        try
+        {
+            // Add timeout protection like in CommandTestsBase
+            using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            var clientTask = McpClientFactory.CreateAsync(clientTransport);
+            Client = await clientTask.WaitAsync(cts.Token);
+        }
+        catch (TimeoutException)
+        {
+            var errorSummary = _serverErrors.Count > 0 ?
+                $"Server errors: {string.Join("; ", _serverErrors.TakeLast(5))}" :
+                "No server error output captured";
+            throw new TimeoutException($"MCP client initialization timed out after 2 minutes. {errorSummary}");
+        }
+        catch (OperationCanceledException)
+        {
+            var errorSummary = _serverErrors.Count > 0 ?
+                $"Server errors: {string.Join("; ", _serverErrors.TakeLast(5))}" :
+                "No server error output captured";
+            throw new OperationCanceledException($"MCP client initialization was cancelled or timed out. {errorSummary}");
+        }
     }
 }
