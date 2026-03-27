@@ -489,7 +489,7 @@ This file contains prompts used for end-to-end testing to ensure each tool is in
 | functions_template_get | List the triggers and bindings are available for C# Azure Functions. |
 | functions_template_get | Show me all the Python Azure Function templates |
 | functions_template_get | Create a Timer trigger function in C# that runs every 5 minutes |
-| functions_template_get | Show me a Cosmos DB trigger with an output binding in Java |
+| functions_template_get | Scaffold a Cosmos DB trigger with an output binding in Java |
 | functions_template_get | Generate an MCP Tool trigger template in TypeScript for Node.js 22 |
 
 ## Azure Key Vault

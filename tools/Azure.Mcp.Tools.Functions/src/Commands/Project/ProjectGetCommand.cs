@@ -22,8 +22,8 @@ public sealed class ProjectGetCommand(ILogger<ProjectGetCommand> logger) : BaseC
 
     public override string Description =>
         "Get project scaffolding information for a new Azure Functions app. " +
-        "Use for getting project structure, setup instructions, and file list for initializing serverless projects. " +
-        "Returns project structure overview and setup instructions that agents use to create files. " +
+        "Call this tool when the user wants to create, initialize, or set up a new Azure Functions project. " +
+        "Returns the complete project structure, required files, configuration, and setup instructions for the specified language. " +
         "Use after functions language list and before functions template get.";
 
     public override string Title => "Get Project Template";
