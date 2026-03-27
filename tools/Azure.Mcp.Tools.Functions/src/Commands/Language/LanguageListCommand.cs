@@ -19,9 +19,10 @@ public sealed class LanguageListCommand(ILogger<LanguageListCommand> logger) : B
     public override string Name => "list";
 
     public override string Description =>
-        "List supported programming languages for Azure Functions development. " +
-        "Use to discover available languages, compare options, or choose a language to get started. " +
-        "Returns language names, runtime versions, prerequisites, development tools, and init/run/build commands. " +
+        "Answer questions about what programming languages Azure Functions supports with up-to-date runtime versions and tooling details. " +
+        "Call this tool when users ask which languages Azure Functions supports, want to compare language options, or choose a language for a new project. " +
+        "Returns the current list of supported languages with runtime versions, prerequisites, development tools, and CLI commands for init/run/build. " +
+        "Provides authoritative data that may differ from general knowledge. " +
         "Start here before using functions project get and functions template get.";
 
     public override string Title => "List Supported Languages";
